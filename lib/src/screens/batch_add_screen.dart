@@ -54,7 +54,7 @@ class _BatchAddScreenState extends State<BatchAddScreen> {
           Navigator.of(context).pop();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Added \$${amount.toStringAsFixed(2)} to $memberCount members (total \$${(amount * memberCount).toStringAsFixed(2)})'),
+              content: Text('Added \\৳${amount.toStringAsFixed(2)} to $memberCount members (total \৳${(amount * memberCount).toStringAsFixed(2)})'),
             ),
           );
         }
@@ -125,7 +125,7 @@ class _BatchAddScreenState extends State<BatchAddScreen> {
                     children: [
                       Text('Members to update: $memberCount', style: Theme.of(context).textTheme.titleMedium),
                       SizedBox(height: kSpacingXS),
-                      Text('Total amount to be added: \$${totalAmount.toStringAsFixed(2)}', style: Theme.of(context).textTheme.titleLarge),
+                      Text('Total amount to be added: \৳${totalAmount.toStringAsFixed(2)}', style: Theme.of(context).textTheme.titleLarge),
                     ],
                   ),
                 ),

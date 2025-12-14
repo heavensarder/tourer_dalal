@@ -57,9 +57,9 @@ class MemberDetailScreen extends StatelessWidget {
                       children: [
                         Text(member.name, style: Theme.of(context).textTheme.headlineMedium),
                         SizedBox(height: kSpacingXS),
-                        Text('Total Paid: \$${member.totalPaid.toStringAsFixed(2)}', style: Theme.of(context).textTheme.titleLarge),
+                        Text('Total Paid: \৳${member.totalPaid.toStringAsFixed(2)}', style: Theme.of(context).textTheme.titleLarge),
                         SizedBox(height: kSpacingXS),
-                        Text('Initial Contribution Per Round: \$${member.initialContributionPerRound.toStringAsFixed(2)}', style: Theme.of(context).textTheme.bodyMedium),
+                        Text('Initial Contribution Per Round: \\৳$${member.initialContributionPerRound.toStringAsFixed(2)}', style: Theme.of(context).textTheme.bodyMedium),
                         Text('Joined: ${DateFormat('yyyy-MM-dd').format(DateTime.parse(member.createdAt))}', style: Theme.of(context).textTheme.bodySmall),
                         SizedBox(height: kSpacingS),
                         Align(
@@ -99,7 +99,7 @@ class MemberDetailScreen extends StatelessWidget {
                             '${transaction.note != null && transaction.note!.isNotEmpty ? '\n${transaction.note}' : ''}',
                           ),
                           trailing: Text(
-                            '${transaction.type == 'deposit' ? '+' : '-'}\$${transaction.amount.toStringAsFixed(2)}',
+                            '${transaction.type == 'deposit' ? '+' : '-'}\৳${transaction.amount.toStringAsFixed(2)}',
                             style: TextStyle(
                               color: transaction.type == 'deposit' ? Colors.green : Colors.red,
                               fontWeight: FontWeight.bold,
