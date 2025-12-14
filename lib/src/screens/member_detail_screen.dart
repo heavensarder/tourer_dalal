@@ -59,7 +59,7 @@ class MemberDetailScreen extends StatelessWidget {
                         SizedBox(height: kSpacingXS),
                         Text('Total Paid: \৳${member.totalPaid.toStringAsFixed(2)}', style: Theme.of(context).textTheme.titleLarge),
                         SizedBox(height: kSpacingXS),
-                        Text('Initial Contribution Per Round: \\৳$${member.initialContributionPerRound.toStringAsFixed(2)}', style: Theme.of(context).textTheme.bodyMedium),
+                        Text('Initial Contribution Per Round: \\৳${member.initialContributionPerRound.toStringAsFixed(2)}', style: Theme.of(context).textTheme.bodyMedium),
                         Text('Joined: ${DateFormat('yyyy-MM-dd').format(DateTime.parse(member.createdAt))}', style: Theme.of(context).textTheme.bodySmall),
                         SizedBox(height: kSpacingS),
                         Align(
