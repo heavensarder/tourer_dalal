@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tourer_dalal/src/config/theme.dart';
 import 'package:tourer_dalal/src/providers/app_state.dart';
+import 'package:tourer_dalal/src/utils/snackbar_utils.dart'; // New import
 
 class AddMemberScreen extends StatefulWidget {
   const AddMemberScreen({super.key});
@@ -44,8 +45,12 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
 
         if (mounted) {
           Navigator.of(context).pop();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('$name added successfully!')),
+          SnackbarUtils.showUndoSnackBar(
+            context, 
+            '$name added successfully!',
+            () {
+              appState.undoLastAction();
+            },
           );
         }
       } catch (e) {

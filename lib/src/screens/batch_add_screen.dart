@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tourer_dalal/src/config/theme.dart';
 import 'package:tourer_dalal/src/providers/app_state.dart';
+import 'package:tourer_dalal/src/utils/snackbar_utils.dart'; // New import
 
 class BatchAddScreen extends StatefulWidget {
   const BatchAddScreen({super.key});
@@ -52,10 +53,12 @@ class _BatchAddScreenState extends State<BatchAddScreen> {
 
         if (mounted) {
           Navigator.of(context).pop();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Added \\৳${amount.toStringAsFixed(2)} to $memberCount members (total \৳${(amount * memberCount).toStringAsFixed(2)})'),
-            ),
+          SnackbarUtils.showUndoSnackBar(
+            context,
+            'Added \৳${amount.toStringAsFixed(2)} to $memberCount members (total \৳${(amount * memberCount).toStringAsFixed(2)})',
+            () {
+              appState.undoLastAction();
+            },
           );
         }
       } catch (e) {

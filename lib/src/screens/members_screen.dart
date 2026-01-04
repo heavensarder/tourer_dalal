@@ -5,7 +5,8 @@ import 'package:tourer_dalal/src/config/theme.dart';
 import 'package:tourer_dalal/src/models/member.dart';
 import 'package:tourer_dalal/src/providers/app_state.dart';
 import 'package:tourer_dalal/src/widgets/top_up_dialog.dart';
-import 'package:flutter_slidable/flutter_slidable.dart'; // New import
+import 'package:tourer_dalal/src/utils/snackbar_utils.dart'; // New import
+import 'package:flutter_slidable/flutter_slidable.dart'; 
 
 class MembersScreen extends StatefulWidget {
   const MembersScreen({super.key});
@@ -38,10 +39,15 @@ class _MembersScreenState extends State<MembersScreen> {
 
     if (confirm == true) {
       try {
-        await Provider.of<AppState>(context, listen: false).deleteMember(member.id);
+        final appState = Provider.of<AppState>(context, listen: false);
+        await appState.deleteMember(member.id);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('${member.name} deleted successfully!')),
+          SnackbarUtils.showUndoSnackBar(
+            context,
+            '${member.name} deleted successfully!',
+            () {
+              appState.undoLastAction();
+            },
           );
         }
       } catch (e) {

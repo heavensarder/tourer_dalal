@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tourer_dalal/src/config/theme.dart';
 import 'package:tourer_dalal/src/providers/app_state.dart';
+import 'package:tourer_dalal/src/utils/snackbar_utils.dart'; // New import
 
 class AddExpenseScreen extends StatefulWidget {
   const AddExpenseScreen({super.key});
@@ -40,8 +41,12 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
         if (mounted) {
           Navigator.of(context).pop();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Expense "$title" added successfully!')),
+          SnackbarUtils.showUndoSnackBar(
+            context,
+            'Expense "$title" added successfully!',
+            () {
+               appState.undoLastAction();
+            },
           );
         }
       } catch (e) {

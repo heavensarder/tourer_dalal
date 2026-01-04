@@ -5,7 +5,8 @@ import 'package:tourer_dalal/src/models/member.dart';
 import 'package:tourer_dalal/src/models/transaction_model.dart';
 import 'package:tourer_dalal/src/providers/app_state.dart';
 import 'package:tourer_dalal/src/widgets/top_up_dialog.dart';
-import 'package:intl/intl.dart'; // Import for DateFormat
+import 'package:intl/intl.dart'; 
+import 'package:tourer_dalal/src/utils/snackbar_utils.dart'; // New import
 
 class MemberDetailScreen extends StatelessWidget {
   final int memberId;
@@ -13,12 +14,51 @@ class MemberDetailScreen extends StatelessWidget {
   const MemberDetailScreen({super.key, required this.memberId});
 
   void _showTopUpDialog(BuildContext context, Member member) {
-    showDialog(
+// ...
+  }
+  
+  Future<void> _confirmDelete(BuildContext context, Member member, AppState appState) async {
+    final bool? confirm = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
-        return TopUpDialog(memberId: member.id, memberName: member.name);
+        return AlertDialog(
+          title: const Text('Confirm Delete'),
+          content: Text('Are you sure you want to delete ${member.name}?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Delete'),
+            ),
+          ],
+        );
       },
     );
+
+    if (confirm == true) {
+      try {
+        await appState.deleteMember(member.id);
+        if (context.mounted) {
+          Navigator.of(context).pop(); // Go back to members list
+          SnackbarUtils.showUndoSnackBar(
+            context,
+            '${member.name} deleted successfully!',
+            () {
+              appState.undoLastAction();
+            },
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to delete ${member.name}: $e')),
+          );
+        }
+      }
+    }
   }
 
   @override
@@ -26,6 +66,18 @@ class MemberDetailScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Member Details'),
+        actions: [
+          Consumer<AppState>(
+            builder: (context, appState, child) {
+               final member = appState.members.where((m) => m.id == memberId).firstOrNull;
+               if (member == null) return const SizedBox.shrink();
+               return IconButton(
+                icon: const Icon(Icons.delete),
+                onPressed: () => _confirmDelete(context, member, appState),
+               );
+            },
+          ),
+        ],
       ),
       body: Consumer<AppState>(
         builder: (context, appState, child) {

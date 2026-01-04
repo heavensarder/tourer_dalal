@@ -4,6 +4,7 @@ import 'package:tourer_dalal/src/config/theme.dart';
 import 'package:tourer_dalal/src/models/member.dart';
 import 'package:tourer_dalal/src/models/transaction_model.dart';
 import 'package:tourer_dalal/src/providers/app_state.dart';
+import 'package:tourer_dalal/src/utils/snackbar_utils.dart'; // New import
 import 'package:intl/intl.dart';
 import 'package:flutter_slidable/flutter_slidable.dart'; // New import
 
@@ -94,8 +95,12 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                       await appState.deleteTransaction(transaction.id);
                       if (mounted) {
                         Navigator.of(dialogContext).pop(); // Close detail dialog
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Transaction deleted successfully!')),
+                        SnackbarUtils.showUndoSnackBar(
+                          context,
+                          'Transaction deleted successfully!',
+                          () {
+                            appState.undoLastAction();
+                          },
                         );
                       }
                     } catch (e) {

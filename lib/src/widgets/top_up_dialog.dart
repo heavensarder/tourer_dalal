@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tourer_dalal/src/config/theme.dart';
 import 'package:tourer_dalal/src/providers/app_state.dart';
+import 'package:tourer_dalal/src/utils/snackbar_utils.dart'; // New import
 
 class TopUpDialog extends StatefulWidget {
   final int memberId;
@@ -43,8 +44,12 @@ class _TopUpDialogState extends State<TopUpDialog> {
         await appState.topUpMember(widget.memberId, amount, note: note);
         if (mounted) {
           Navigator.of(context).pop();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Successfully topped up ${widget.memberName}')),
+          SnackbarUtils.showUndoSnackBar(
+            context,
+            'Successfully topped up ${widget.memberName}',
+            () {
+              appState.undoLastAction();
+            },
           );
         }
       } catch (e) {

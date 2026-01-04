@@ -72,13 +72,14 @@ class DBHelper {
     );
   }
 
-  Future<int> insertMember(Map<String, dynamic> memberData, {double initialAmount = 0.0}) async {
+  Future<int> insertMember(Map<String, dynamic> memberData, {double initialAmount = 0.0, int? id}) async {
     final db = await database;
     return await db.transaction((txn) async {
       final memberId = await txn.insert('members', {
+        if (id != null) 'id': id,
         ...memberData,
         'totalPaid': initialAmount,
-        'createdAt': DateTime.now().toIso8601String(),
+        'createdAt': memberData['createdAt'] ?? DateTime.now().toIso8601String(),
       });
 
       if (initialAmount > 0) {
@@ -95,9 +96,9 @@ class DBHelper {
     });
   }
 
-  Future<void> addMemberContribution(int memberId, double amount, {String title = 'Top-up', String note = ''}) async {
+  Future<int> addMemberContribution(int memberId, double amount, {String title = 'Top-up', String note = '', int? transactionId}) async {
     final db = await database;
-    await db.transaction((txn) async {
+    return await db.transaction((txn) async {
       final member = (await txn.query('members', where: 'id = ?', whereArgs: [memberId])).first;
       final currentTotalPaid = member['totalPaid'] as double;
       
@@ -108,7 +109,8 @@ class DBHelper {
         whereArgs: [memberId],
       );
 
-      await txn.insert('transactions', {
+      return await txn.insert('transactions', {
+        if (transactionId != null) 'id': transactionId,
         'type': 'deposit',
         'memberId': memberId,
         'title': title,
@@ -119,10 +121,11 @@ class DBHelper {
     });
   }
 
-  Future<void> addBatchContribution(double amountPerMember, {String title = 'Batch add', String note = ''}) async {
+  Future<List<int>> addBatchContribution(double amountPerMember, {String title = 'Batch add', String note = ''}) async {
     final db = await database;
-    await db.transaction((txn) async {
+    return await db.transaction((txn) async {
       final members = await txn.query('members');
+      List<int> transactionIds = [];
       for (var member in members) {
         final memberId = member['id'] as int;
         final currentTotalPaid = member['totalPaid'] as double;
@@ -133,7 +136,7 @@ class DBHelper {
           whereArgs: [memberId],
         );
 
-        await txn.insert('transactions', {
+        final id = await txn.insert('transactions', {
           'type': 'deposit',
           'memberId': memberId,
           'title': title,
@@ -141,14 +144,17 @@ class DBHelper {
           'note': note,
           'dateTime': DateTime.now().toIso8601String(),
         });
+        transactionIds.add(id);
       }
+      return transactionIds;
     });
   }
 
-  Future<int> insertExpense(String title, double amount, {String note = ''}) async {
+  Future<int> insertExpense(String title, double amount, {String note = '', int? id}) async {
     final db = await database;
     return await db.transaction((txn) async {
       return await txn.insert('transactions', {
+        if (id != null) 'id': id,
         'type': 'expense',
         'title': title,
         'amount': amount,
@@ -158,13 +164,34 @@ class DBHelper {
     });
   }
 
-  Future<void> deleteTransaction(int transactionId) async {
+  Future<void> restoreTransaction(Map<String, dynamic> transactionData) async {
+     final db = await database;
+     await db.transaction((txn) async {
+        final type = transactionData['type'];
+        final amount = transactionData['amount'];
+        final memberId = transactionData['memberId'];
+
+        if (type == 'deposit' && memberId != null) {
+          final member = (await txn.query('members', where: 'id = ?', whereArgs: [memberId])).firstOrNull;
+          if (member != null) {
+             final currentTotalPaid = member['totalPaid'] as double;
+             await txn.update(
+              'members',
+              {'totalPaid': currentTotalPaid + amount},
+              where: 'id = ?',
+              whereArgs: [memberId],
+            );
+          }
+        }
+        
+        await txn.insert('transactions', transactionData);
+     });
+  }
+
+  Future<Map<String, dynamic>> deleteTransaction(int transactionId) async {
     final db = await database;
-    await db.transaction((txn) async {
+    return await db.transaction((txn) async {
       final transaction = (await txn.query('transactions', where: 'id = ?', whereArgs: [transactionId])).first;
-      if (transaction == null) {
-        throw Exception('Transaction not found');
-      }
 
       final String type = transaction['type'] as String;
       final double amount = transaction['amount'] as double;
@@ -188,6 +215,8 @@ class DBHelper {
         where: 'id = ?',
         whereArgs: [transactionId],
       );
+      
+      return transaction;
     });
   }
 
@@ -199,14 +228,16 @@ class DBHelper {
     });
   }
 
-  Future<void> deleteMember(int id) async {
+  Future<Map<String, dynamic>> deleteMember(int id) async {
     final db = await database;
-    await db.transaction((txn) async {
-      await txn.delete(
+    return await db.transaction((txn) async {
+      final member = (await txn.query('members', where: 'id = ?', whereArgs: [id])).first;
+       await txn.delete(
         'members',
         where: 'id = ?',
         whereArgs: [id],
       );
+      return member;
     });
   }
 
